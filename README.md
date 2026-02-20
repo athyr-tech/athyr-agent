@@ -1,6 +1,6 @@
 # athyr-agent
 
-YAML-driven agent runner for [Athyr](https://github.com/athyr-tech). Define AI agents in YAML, connect them to an Athyr
+YAML-driven agent runner for [Athyr](https://athyr.tech). Define AI agents in YAML, connect them to an Athyr
 server, and let them process messages through LLMs — no Go code required.
 
 ```
@@ -33,7 +33,7 @@ cd athyr-agent
 make build
 ```
 
-Requires Go 1.25+ and a running [Athyr server](https://github.com/athyr-tech/athyr).
+Requires Go 1.25+ and a running [Athyr server](https://github.com/athyr-tech/athyr-bin).
 
 ## Quick Start
 
