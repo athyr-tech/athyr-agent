@@ -24,16 +24,17 @@ graph LR
 ## Install
 
 ```bash
-# From source
-go install github.com/athyr-tech/athyr-agent/cmd/athyr-agent@latest
+# Homebrew
+brew install athyr-tech/tap/athyr-agent
 
-# Or build locally
-git clone https://github.com/athyr-tech/athyr-agent.git
-cd athyr-agent
-make build
+# Or download from GitHub releases
+# https://github.com/athyr-tech/athyr-agent/releases
+
+# Or from source
+go install github.com/athyr-tech/athyr-agent/cmd/athyr-agent@latest
 ```
 
-Requires Go 1.25+ and a running [Athyr server](https://github.com/athyr-tech/athyr-bin).
+Requires a running [Athyr server](https://github.com/athyr-tech/athyr-bin).
 
 ## Quick Start
 
