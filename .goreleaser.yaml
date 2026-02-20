@@ -40,13 +40,20 @@ changelog:
       - "^ci:"
       - "^test:"
 
-homebrew_casks:
-  - repository:
+brews:
+  - name: athyr-agent
+    repository:
       owner: athyr-tech
       name: homebrew-tap
-    name: athyr-agent
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: https://athyr.tech
     description: YAML-driven agent runner for Athyr
+    license: MIT
+    install: |
+      bin.install "athyr-agent"
+    test: |
+      system bin/"athyr-agent", "version"
 
 release:
   github:
