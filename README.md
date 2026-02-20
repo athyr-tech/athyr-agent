@@ -34,7 +34,29 @@ brew install athyr-tech/tap/athyr-agent
 go install github.com/athyr-tech/athyr-agent/cmd/athyr-agent@latest
 ```
 
-Requires a running [Athyr server](https://github.com/athyr-tech/athyr-bin).
+### Start Athyr Server
+
+You need a running Athyr server. The easiest way is Docker:
+
+```bash
+# With Ollama (local LLM — default)
+docker run --rm -p 8080:8080 -p 9090:9090 \
+  ghcr.io/athyr-tech/athyr:latest
+
+# With OpenRouter (cloud models)
+docker run --rm -p 8080:8080 -p 9090:9090 \
+  -e OPENROUTER_API_KEY=sk-or-... \
+  -v $(pwd)/docker/athyr.yaml:/app/athyr.yaml \
+  ghcr.io/athyr-tech/athyr:latest
+```
+
+Or use the included docker-compose:
+
+```bash
+OPENROUTER_API_KEY=sk-or-... make docker-up
+```
+
+Verify: `curl http://localhost:8080/healthz` → `{"status":"healthy"}`
 
 ## Quick Start
 

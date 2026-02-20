@@ -1,5 +1,19 @@
 # Examples
 
+## Prerequisites
+
+Start an Athyr server before running any example:
+
+```bash
+# With Ollama (local LLM — default)
+docker run --rm -p 8080:8080 -p 9090:9090 ghcr.io/athyr-tech/athyr:latest
+
+# With OpenRouter (cloud models)
+OPENROUTER_API_KEY=sk-or-... make docker-up
+```
+
+Verify: `curl http://localhost:8080/healthz` → `{"status":"healthy"}`
+
 ## Quick Start with TUI (Recommended)
 
 ```bash

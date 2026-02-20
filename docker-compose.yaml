@@ -1,33 +1,29 @@
 # Athyr server for testing athyr-agent examples
+#
 # Usage:
-#   docker compose up -d        # Start Athyr server
-#   docker compose down          # Stop
-#   docker compose logs -f       # View logs
+#   OPENROUTER_API_KEY=sk-or-... docker compose up -d
+#   docker compose down
+#   docker compose logs -f
 #
-# Prerequisites:
-#   - Athyr server image (not yet public — contact athyr-tech for access)
-#   - OR_ONEUSD env var (OpenRouter API key)
+# Without OpenRouter (uses Ollama on host):
+#   docker run --rm -p 8080:8080 -p 9090:9090 ghcr.io/athyr-tech/athyr:latest
 #
-# Set the API key in your shell or create a .env file:
-#   OR_ONEUSD=sk-or-...
+# Verify:
+#   curl http://localhost:8080/healthz
 
 services:
   athyr:
     image: ghcr.io/athyr-tech/athyr:latest
     ports:
-      - "8080:8080"   # HTTP (REST + metrics)
+      - "8080:8080"   # HTTP (REST + health checks)
       - "9090:9090"   # gRPC (agent connections)
     environment:
-      - OR_ONEUSD=${OR_ONEUSD}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
     volumes:
       - ./docker/athyr.yaml:/app/athyr.yaml:ro
-      - athyr-data:/app/data
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/healthz || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 10
       start_period: 5s
-
-volumes:
-  athyr-data:
