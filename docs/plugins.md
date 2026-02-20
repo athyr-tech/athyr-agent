@@ -61,13 +61,24 @@ The key rule: **a plugin's `name` must appear in `topics.subscribe` or `topics.p
 
 - **Athyr topics and plugins can be mixed** in the same agent. For example, subscribe to both a plugin source and an Athyr topic, or publish to both an Athyr topic and a plugin destination.
 
-```
-Source plugin ──callback(data)──▶ Agent ──▶ LLM ──▶ Destination plugin
-                                   │                      │
-                                   │                 publish(config, data)
-                                   │
-Athyr topic ──subscribe msg──────▶ Agent ──▶ LLM ──▶ Athyr topic
-                                                    agent.Publish(topic, data)
+```mermaid
+graph LR
+    subgraph Plugin Path
+        SP["Source Plugin"] -->|"callback(data)"| A1["Agent + LLM"]
+        A1 -->|"publish(config, data)"| DP["Destination Plugin"]
+    end
+
+    subgraph Athyr Path
+        AT1["Athyr Topic"] -->|"subscribe msg"| A2["Agent + LLM"]
+        A2 -->|"agent.Publish(topic, data)"| AT2["Athyr Topic"]
+    end
+
+    style SP fill:#fff,stroke:#333,color:#333
+    style A1 fill:#fff,stroke:#333,color:#333
+    style DP fill:#fff,stroke:#333,color:#333
+    style AT1 fill:#fff,stroke:#333,color:#333
+    style A2 fill:#fff,stroke:#333,color:#333
+    style AT2 fill:#fff,stroke:#333,color:#333
 ```
 
 ## Plugin Contract

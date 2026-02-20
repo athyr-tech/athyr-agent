@@ -63,19 +63,16 @@ agent:
 
 The data flow for this example:
 
-```
-file-watcher plugin           Agent runtime              webhook-output plugin
-    (Lua)                         (Go)                        (Lua)
-      │                            │                            │
-      │  callback("file content")  │                            │
-      ├───────────────────────────▶│                            │
-      │                            │  LLM processes message     │
-      │                            │  (with MCP tools if needed)│
-      │                            │                            │
-      │                            │  publish("webhook-output", │
-      │                            │          response)         │
-      │                            ├───────────────────────────▶│
-      │                            │                            │  http.post(url, data)
+```mermaid
+sequenceDiagram
+    participant FW as file-watcher<br/>(Lua)
+    participant Agent as Agent Runtime
+    participant WH as webhook-output<br/>(Lua)
+
+    FW->>Agent: callback(file content)
+    Agent->>Agent: LLM processes message
+    Agent->>WH: publish(response)
+    WH->>WH: http.post(url, data)
 ```
 
 ---
