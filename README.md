@@ -1,24 +1,24 @@
 # athyr-agent
 
 YAML-driven agent runner for [Athyr](https://athyr.tech). Define AI agents in YAML, connect them to an Athyr
-server, and let them process messages through LLMs — no Go code required.
+server, and let them process messages through LLMs — no code required.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                       athyr-agent                           │
-│                                                             │
-│  ┌──────────┐  ┌─────────┐  ┌──────────┐  ┌────────────┐    │
-│  │   YAML   │─▶│ Runtime │─▶│ Athyr SDK│─▶│LLM Gateway │    │
-│  │  Config  │  │         │  │  (gRPC)  │  │            │    │
-│  └──────────┘  └─────────┘  └──────────┘  └────────────┘    │
-│                     │                                       │
-│            ┌────────┴───────┐                               │ 
-│            │                │                               │
-│       ┌────┴────┐     ┌─────┴─────┐                         │
-│       │   MCP   │     │    Lua    │                         │
-│       │  Tools  │     │  Plugins  │                         │
-│       └─────────┘     └───────────┘                         │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    YAML["YAML Config"] --> Runtime
+    Runtime --> SDK["Athyr SDK\n(gRPC)"]
+    SDK --> Server["Athyr Server"]
+    Server --> LLM["LLM Gateway"]
+    Runtime --> MCP["MCP Tools"]
+    Runtime --> Plugins["Lua Plugins"]
+
+    style YAML fill:#fff,stroke:#333,color:#333
+    style Runtime fill:#fff,stroke:#333,color:#333
+    style SDK fill:#fff,stroke:#333,color:#333
+    style Server fill:#fff,stroke:#555,color:#333
+    style LLM fill:#fff,stroke:#555,color:#333
+    style MCP fill:#fff,stroke:#999,color:#333,stroke-dasharray: 5 5
+    style Plugins fill:#fff,stroke:#999,color:#333,stroke-dasharray: 5 5
 ```
 
 ## Install
@@ -68,8 +68,7 @@ athyr-agent run agent.yaml --server localhost:9090 --tui
 
 ### Topics (Pub/Sub)
 
-Agents subscribe to input topics and publish responses to output topics. Messages flow through the Athyr server via
-NATS.
+Agents subscribe to input topics and publish responses to output topics. Messages flow through the Athyr server.
 
 ```yaml
 topics:
@@ -158,14 +157,13 @@ See [`examples/`](examples/) for ready-to-run agents:
 | [summarizer](examples/summarizer.yaml)     | Document summarization               | `make run-summarizer-tui` |
 | [memory-chat](examples/memory-chat.yaml)   | Multi-turn conversations             | `make run-memory-tui`     |
 | [mcp-tools](examples/mcp-tools.yaml)       | Research with MCP tools              | `make run-mcp-tui`        |
-| [plugin-agent](examples/plugin-agent.yaml) | Lua plugins (file watcher + webhook) | —                         |
+| [plugin-agent](examples/plugin-agent.yaml) | Lua plugins (file watcher + webhook) | `make run-plugin`         |
 | [demo/](examples/demo/)                    | Multi-agent support workflow         | `make run-classifier-tui` |
 
 ## Documentation
 
 - [Configuration Reference](docs/configuration.md) — All YAML options
 - [Lua Plugins Guide](docs/plugins.md) — Writing and using plugins
-- [Design Document](docs/design.md) — Architecture and decisions
 - [Examples README](examples/README.md) — TUI guide and example details
 
 ## Development

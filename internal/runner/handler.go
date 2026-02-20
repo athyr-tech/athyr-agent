@@ -564,7 +564,7 @@ func (h *MessageHandler) PublishMessage(topic string, data []byte) error {
 }
 
 // RequestMessage sends a message to a topic and waits for a reply.
-// This uses the NATS request/reply pattern with a 30 second timeout.
+// This uses the request/reply pattern with a 30 second timeout.
 func (h *MessageHandler) RequestMessage(topic string, data []byte) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

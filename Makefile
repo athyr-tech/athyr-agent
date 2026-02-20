@@ -44,6 +44,9 @@ run-memory-tui: build
 run-mcp-tui: build
 	./bin/athyr-agent run examples/mcp-tools.yaml --server $(SERVER) --insecure --tui
 
+run-plugin-tui: build
+	./bin/athyr-agent run examples/plugin-agent.yaml --server $(SERVER) --insecure --tui
+
 # Demo agents (run each in a separate terminal)
 run-classifier-tui: build
 	./bin/athyr-agent run examples/demo/classifier.yaml --server $(SERVER) --insecure --tui
@@ -68,6 +71,9 @@ run-memory: build
 
 run-mcp: build
 	./bin/athyr-agent run examples/mcp-tools.yaml --server $(SERVER) --insecure --verbose
+
+run-plugin: build
+	./bin/athyr-agent run examples/plugin-agent.yaml --server $(SERVER) --insecure --verbose
 
 run-classifier: build
 	./bin/athyr-agent run examples/demo/classifier.yaml --server $(SERVER) --insecure --verbose
