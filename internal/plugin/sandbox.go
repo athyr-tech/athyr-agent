@@ -29,6 +29,7 @@ func NewSandbox(restrict []string) (*Sandbox, error) {
 		{lua.TabLibName, lua.OpenTable},
 		{lua.StringLibName, lua.OpenString},
 		{lua.MathLibName, lua.OpenMath},
+		{lua.OsLibName, lua.OpenOs},
 	} {
 		if err := L.CallByParam(lua.P{
 			Fn:      L.NewFunction(pair.fn),
@@ -43,6 +44,19 @@ func NewSandbox(restrict []string) (*Sandbox, error) {
 	// Remove dangerous functions from base library
 	L.SetGlobal("dofile", lua.LNil)
 	L.SetGlobal("loadfile", lua.LNil)
+
+	// Remove dangerous os functions (keep os.time, os.date, os.clock, os.difftime)
+	if osLib := L.GetGlobal("os"); osLib != lua.LNil {
+		if osTbl, ok := osLib.(*lua.LTable); ok {
+			osTbl.RawSetString("execute", lua.LNil)
+			osTbl.RawSetString("exit", lua.LNil)
+			osTbl.RawSetString("getenv", lua.LNil)
+			osTbl.RawSetString("remove", lua.LNil)
+			osTbl.RawSetString("rename", lua.LNil)
+			osTbl.RawSetString("setlocale", lua.LNil)
+			osTbl.RawSetString("tmpname", lua.LNil)
+		}
+	}
 
 	return &Sandbox{
 		L:        L,

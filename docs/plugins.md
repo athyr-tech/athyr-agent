@@ -1,6 +1,6 @@
 # Lua Plugins
 
-Plugins let agents subscribe to and publish events beyond Athyr topics. A file-watcher plugin can trigger the agent when new files appear; an HTTP plugin can post responses to a webhook. Plugins are Lua scripts that implement a simple contract.
+Plugins extend the agent's transport layer — they let agents interact with the host machine and external systems alongside Athyr topics. A file-watcher plugin can trigger the agent when new files appear on the host filesystem; an HTTP plugin can post responses to an external webhook. Plugins and Athyr topics work together — an agent can subscribe to both and publish to both. Plugins are Lua scripts that implement a simple contract.
 
 ## Quick Start
 
@@ -57,27 +57,21 @@ The key rule: **a plugin's `name` must appear in `topics.subscribe` or `topics.p
 
 - **Source plugin** (name in `topics.subscribe`): The runner calls `subscribe(config, callback)`. When the Lua code calls `callback(data)`, the data enters the agent as a message — it goes through the LLM, tool calls, routing, and produces a response.
 
-- **Destination plugin** (name in `topics.publish`): When the agent produces a response, instead of publishing to an Athyr topic, it calls the plugin's `publish(config, data)` with the response content.
+- **Destination plugin** (name in `topics.publish`): When the agent produces a response routed to this plugin, it calls the plugin's `publish(config, data)` with the response content.
 
 - **Athyr topics and plugins can be mixed** in the same agent. For example, subscribe to both a plugin source and an Athyr topic, or publish to both an Athyr topic and a plugin destination.
 
 ```mermaid
 graph LR
-    subgraph Plugin Path
-        SP["Source Plugin"] -->|"callback(data)"| A1["Agent + LLM"]
-        A1 -->|"publish(config, data)"| DP["Destination Plugin"]
-    end
-
-    subgraph Athyr Path
-        AT1["Athyr Topic"] -->|"subscribe msg"| A2["Agent + LLM"]
-        A2 -->|"agent.Publish(topic, data)"| AT2["Athyr Topic"]
-    end
+    SP["Source Plugin"] -->|"callback(data)"| A["Agent + LLM"]
+    AT1["Athyr Topic"] -->|"subscribe msg"| A
+    A -->|"publish(config, data)"| DP["Destination Plugin"]
+    A -->|"agent.Publish(topic, data)"| AT2["Athyr Topic"]
 
     style SP fill:#fff,stroke:#333,color:#333
-    style A1 fill:#fff,stroke:#333,color:#333
+    style A fill:#fff,stroke:#333,color:#333
     style DP fill:#fff,stroke:#333,color:#333
     style AT1 fill:#fff,stroke:#333,color:#333
-    style A2 fill:#fff,stroke:#333,color:#333
     style AT2 fill:#fff,stroke:#333,color:#333
 ```
 
@@ -201,7 +195,8 @@ This lets you run community plugins with limited permissions.
 ## Sandbox
 
 Each plugin runs in its own Lua VM with:
-- Only safe standard libraries loaded (`base`, `table`, `string`, `math`, `package`)
+- Safe standard libraries loaded (`base`, `table`, `string`, `math`, `os`, `package`)
+- Safe `os` functions only: `os.time()`, `os.date()`, `os.clock()`, `os.difftime()` (dangerous functions like `os.execute`, `os.remove` are removed)
 - `dofile` and `loadfile` removed (no arbitrary file execution)
 - Separate state — plugins cannot interfere with each other
 
@@ -210,5 +205,6 @@ Each plugin runs in its own Lua VM with:
 See `examples/plugins/` for working examples:
 
 - **`file-watcher.lua`** — Source plugin that polls a directory for new files
+- **`json-catalog.lua`** — Destination plugin that saves LLM responses as JSON files
 - **`http-output.lua`** — Destination plugin that posts responses to a webhook
-- **`plugin-agent.yaml`** — Agent config wiring both plugins together
+- **`plugin-agent.yaml`** — Agent config mixing plugins with Athyr topics and LLM routing

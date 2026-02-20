@@ -25,9 +25,11 @@ agent:
 
   topics:
     subscribe:
-      - file-watcher    # Plugin source — triggers agent when new files appear
+      - file-watcher    # Plugin source — polls the host filesystem for new files
+      - tasks.assigned  # Athyr topic — receives messages from other agents
     publish:
-      - webhook-output  # Plugin destination — posts responses to a webhook
+      - results.ready   # Athyr topic — other agents can subscribe to this
+      - webhook-output  # Plugin destination — posts to an external webhook
 
   memory:
     enabled: true
@@ -66,11 +68,15 @@ The data flow for this example:
 ```mermaid
 sequenceDiagram
     participant FW as file-watcher<br/>(Lua)
+    participant AT1 as tasks.assigned<br/>(Athyr Topic)
     participant Agent as Agent Runtime
+    participant AT2 as results.ready<br/>(Athyr Topic)
     participant WH as webhook-output<br/>(Lua)
 
     FW->>Agent: callback(file content)
+    AT1->>Agent: subscribe message
     Agent->>Agent: LLM processes message
+    Agent->>AT2: publish(response)
     Agent->>WH: publish(response)
     WH->>WH: http.post(url, data)
 ```
@@ -105,7 +111,7 @@ Defines which topics the agent subscribes to and publishes on.
 | `publish` | list of strings | yes | Topics to send responses to (at least one) |
 | `routes` | list of objects | no | Dynamic routing destinations |
 
-Topic names can refer to Athyr topics or Lua plugin names. When a topic name matches a plugin's `name`, the runner uses the plugin instead of the Athyr SDK.
+Topic names can refer to Athyr topics or Lua plugin names. When a topic name matches a plugin's `name`, the runner routes through the plugin for that topic. Athyr topics and plugins can be mixed freely — for example, subscribe to a plugin source and an Athyr topic, or publish to both.
 
 ### `agent.topics.routes[]`
 

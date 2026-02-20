@@ -117,8 +117,7 @@ memory:
 
 ### Lua Plugins
 
-Extend agents with custom event sources and destinations written in Lua. See [docs/plugins.md](docs/plugins.md) for the
-full guide.
+Extend agents with custom event sources and destinations written in Lua. Plugins let agents interact with the host machine and external systems alongside Athyr topics. See [docs/plugins.md](docs/plugins.md) for the full guide.
 
 ```yaml
 plugins:

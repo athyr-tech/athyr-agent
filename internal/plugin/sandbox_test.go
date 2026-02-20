@@ -40,6 +40,33 @@ func TestSandbox_NativeLibsRemoved(t *testing.T) {
 	}
 }
 
+func TestSandbox_SafeOsFunctions(t *testing.T) {
+	sb, err := NewSandbox(nil)
+	if err != nil {
+		t.Fatalf("NewSandbox() error = %v", err)
+	}
+	defer sb.Close()
+
+	// os.time and os.date should work
+	err = sb.DoString(`t = os.time()`)
+	if err != nil {
+		t.Errorf("os.time() should be available: %v", err)
+	}
+
+	err = sb.DoString(`d = os.date("!%Y-%m-%dT%H:%M:%SZ")`)
+	if err != nil {
+		t.Errorf("os.date() should be available: %v", err)
+	}
+
+	// Dangerous os functions should be removed
+	for _, fn := range []string{"execute", "exit", "getenv", "remove", "rename"} {
+		err = sb.DoString(`os.` + fn + `()`)
+		if err == nil {
+			t.Errorf("os.%s should not be available", fn)
+		}
+	}
+}
+
 func TestSandbox_RestrictionCheck(t *testing.T) {
 	sb, err := NewSandbox([]string{"fs", "http.post"})
 	if err != nil {

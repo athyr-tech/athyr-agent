@@ -1,33 +1,56 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# Plugin Agent - Demonstrates Lua plugins as event sources and destinations
+# Plugin Agent - Host filesystem monitoring with LLM routing
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# This agent watches a directory for new files, processes them with an LLM,
-# and posts the response to a webhook URL.
+# Plugins let agents interact with the host machine and external systems
+# alongside Athyr topics. This agent mixes both:
 #
-# Plugins:
-#   - file-watcher (source): polls ./watched/ for new files
-#   - http-output (destination): posts responses to a webhook
+#   - file-watcher plugin reads new files from the host filesystem
+#   - Athyr LLM analyzes content, extracts metadata, and routes the response
+#   - json-catalog plugin maintains a catalog.json on the host filesystem
+#   - http-output plugin sends alerts to an external webhook
+#   - results.ready Athyr topic notifies other agents
 #
-# Run:  athyr-agent run examples/plugin-agent.yaml --server localhost:9090
+# Run:  make run-plugin-tui    (recommended)
+#       athyr-agent run examples/plugin-agent.yaml --server localhost:9090
+#
+# Test: mkdir -p watched/catalog
+#       echo "ERROR: disk usage at 95%" > watched/alert.txt
+#       echo "Q3 revenue grew 12% YoY" > watched/report.txt
+#       ls watched/catalog/
 #
 # ═══════════════════════════════════════════════════════════════════════════════
 
 agent:
   name: file-processor
-  description: Processes new files and sends results to a webhook
+  description: Catalogs documents and routes alerts to webhook
 
   model: google/gemini-2.5-flash-lite
 
   instructions: |
     You receive the contents of newly created files.
-    Analyze the content and provide a brief summary with any notable findings.
+    Analyze the content and respond with a JSON object:
+
+    {"title": "...", "summary": "...", "tags": ["...", "..."]}
+
+    - title: a short descriptive title for the document
+    - summary: 1-2 sentence summary of the content
+    - tags: relevant categories (e.g., "finance", "ops", "alert", "report")
+
+    Respond ONLY with the JSON object, no additional text.
 
   topics:
     subscribe:
-      - file-watcher    # Plugin source
+      - file-watcher          # Plugin: polls host filesystem for new files
     publish:
-      - http-output     # Plugin destination
+      - json-catalog          # Plugin: appends entry to catalog.json
+    routes:
+      - topic: http-output    # Plugin: webhook for urgent alerts
+        description: Alerts, errors, warnings, or anything requiring immediate attention
+      - topic: json-catalog
+        description: Document summaries, reports, and general content to catalog
+      - topic: results.ready  # Athyr topic: notify other agents
+        description: Notable findings worth sharing with other agents
 
   plugins:
     - name: file-watcher
@@ -35,6 +58,11 @@ agent:
       config:
         path: ./watched
         interval: 5
+
+    - name: json-catalog
+      file: ./examples/plugins/json-catalog.lua
+      config:
+        path: ./watched/catalog
 
     - name: http-output
       file: ./examples/plugins/http-output.lua
