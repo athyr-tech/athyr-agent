@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Classifier Agent - Intelligent ticket routing with dynamic topics
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Run:    make run-classifier-tui    (recommended)
+#         make run-classifier        (terminal mode)
+#
+# Test:   Messaging tab (press 3) → topic: ticket.new
+# Watch:  Dashboard (routing decisions), Logs (classification details)
+#
+# Example message:
+#   I was charged twice for my subscription this month.
+#
+# Expected output:
+#   {"route_to": "ticket.billing", "category": "billing", "confidence": 0.95, ...}
+#
+# Flow:
+#   ticket.new → [Classifier] → ticket.billing OR ticket.technical
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: classifier
+  description: Classifies and routes support tickets
+
+  model: google/gemini-2.5-flash-lite
+
+  instructions: |
+    You are a support ticket classifier. Analyze the customer's message and
+    determine whether it's a billing issue or a technical issue.
+
+    Always respond with valid JSON containing:
+    - route_to: The topic to route to (based on your classification)
+    - category: "billing" or "technical"
+    - confidence: Your confidence level (0.0 to 1.0)
+    - summary: A brief summary of the issue
+    - original_message: The customer's original message (copy it exactly)
+
+    Routing rules:
+    - confidence >= 0.8: Route with certainty
+    - confidence < 0.8: Include "needs_review": true in output
+
+  topics:
+    subscribe:
+      - ticket.new
+    publish:
+      - ticket.unknown  # Default fallback if routing fails
+
+    routes:
+      - topic: ticket.billing
+        description: Payment issues, invoices, refunds, subscription changes, pricing questions
+      - topic: ticket.technical
+        description: Bugs, errors, crashes, performance issues, how-to questions, feature requests

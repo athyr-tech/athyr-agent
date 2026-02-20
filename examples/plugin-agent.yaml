@@ -1,0 +1,43 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Plugin Agent - Demonstrates Lua plugins as event sources and destinations
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This agent watches a directory for new files, processes them with an LLM,
+# and posts the response to a webhook URL.
+#
+# Plugins:
+#   - file-watcher (source): polls ./watched/ for new files
+#   - http-output (destination): posts responses to a webhook
+#
+# Run:  athyr-agent run examples/plugin-agent.yaml --server localhost:9090
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: file-processor
+  description: Processes new files and sends results to a webhook
+
+  model: google/gemini-2.5-flash-lite
+
+  instructions: |
+    You receive the contents of newly created files.
+    Analyze the content and provide a brief summary with any notable findings.
+
+  topics:
+    subscribe:
+      - file-watcher    # Plugin source
+    publish:
+      - http-output     # Plugin destination
+
+  plugins:
+    - name: file-watcher
+      file: ./examples/plugins/file-watcher.lua
+      config:
+        path: ./watched
+        interval: 5
+
+    - name: http-output
+      file: ./examples/plugins/http-output.lua
+      config:
+        url: https://httpbin.org/post
+        content_type: application/json

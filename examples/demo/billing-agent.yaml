@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Billing Specialist Agent - Handles payment and subscription issues
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Run:    make run-billing-tui       (recommended)
+#         make run-billing           (terminal mode)
+#
+# Test:   Receives routed messages from classifier on ticket.billing
+# Watch:  Dashboard (responses), Tools (MCP), Logs (debug)
+#
+# Input format (from classifier):
+#   {"category": "billing", "summary": "...", "original_message": "..."}
+#
+# Expected output:
+#   Helpful response addressing the customer's billing concern.
+#
+# Flow:
+#   ticket.billing → [Billing Agent] → ticket.response
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: billing-specialist
+  description: Handles billing and payment support tickets
+
+  model: google/gemini-2.5-flash-lite
+
+  instructions: |
+    You are a billing support specialist. You receive pre-classified billing tickets.
+
+    The message you receive is JSON with:
+    - category: "billing"
+    - summary: Brief summary of the issue
+    - original_message: The customer's original message
+
+    Your job:
+    1. Read the original_message to understand the customer's issue
+    2. Use your tools to research if needed (look up policies, search for solutions)
+    3. Provide a helpful, friendly response to the customer
+
+    Be concise but thorough. If you can't fully resolve the issue, explain next steps.
+
+  topics:
+    subscribe:
+      - ticket.billing
+    publish:
+      - ticket.response
+
+  mcp:
+    servers:
+      - name: docker-gateway
+        command: ["docker", "mcp", "gateway", "run"]

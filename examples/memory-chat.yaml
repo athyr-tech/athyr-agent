@@ -1,0 +1,55 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Memory Chat Agent - Multi-turn conversations with session memory
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Run:    make run-memory-tui        (recommended)
+#         make run-memory            (terminal mode)
+#
+# Test:   Messaging tab (press 3) → topic: chat.input
+# Watch:  Dashboard (messages), Logs (debug)
+#
+# Example message (JSON with session_id):
+#   {"session_id": "user-123", "content": "My name is Alice"}
+#
+# Follow-up message (same session):
+#   {"session_id": "user-123", "content": "What is my name?"}
+#
+# Expected output:
+#   Agent remembers "Alice" from the first message.
+#
+# How it works:
+#   1. Agent extracts session_id from incoming message JSON
+#   2. If memory.enabled=true and session_id present, passes to Athyr
+#   3. Athyr injects conversation history into LLM context
+#   4. Response is added to session history automatically
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: memory-chat
+  description: Chat agent with multi-turn conversation memory
+
+  model: google/gemini-2.5-flash-lite
+
+  instructions: |
+    You are a friendly conversational assistant with memory.
+
+    Guidelines:
+    - Remember details shared in this session (names, preferences, topics discussed)
+    - Reference previous conversation naturally ("As you mentioned...")
+    - If asked about something you remember, confirm it clearly
+    - Be warm and personable while remaining helpful
+
+  topics:
+    subscribe:
+      - chat.input
+    publish:
+      - chat.output
+
+  # Enable session memory
+  memory:
+    enabled: true
+    profile:
+      type: rolling_window      # Memory management strategy
+      max_tokens: 4096          # Max tokens to keep in memory
+      summarization_threshold: 3000  # When to summarize older messages

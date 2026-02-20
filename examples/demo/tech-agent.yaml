@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technical Specialist Agent - Handles bugs, errors, and technical issues
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Run:    make run-tech-tui          (recommended)
+#         make run-tech              (terminal mode)
+#
+# Test:   Receives routed messages from classifier on ticket.technical
+# Watch:  Dashboard (responses), Tools (MCP), Logs (debug)
+#
+# Input format (from classifier):
+#   {"category": "technical", "summary": "...", "original_message": "..."}
+#
+# Expected output:
+#   Technical response with clear steps, code snippets if helpful.
+#
+# Flow:
+#   ticket.technical → [Tech Agent] → ticket.response
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: tech-specialist
+  description: Handles technical support tickets
+
+  model: google/gemini-2.5-flash-lite
+
+  instructions: |
+    You are a technical support specialist. You receive pre-classified technical tickets.
+
+    The message you receive is JSON with:
+    - category: "technical"
+    - summary: Brief summary of the issue
+    - original_message: The customer's original message
+
+    Your job:
+    1. Read the original_message to understand the customer's technical issue
+    2. Use your tools to research solutions (search docs, look up error messages)
+    3. Provide a helpful, technical response with clear steps
+
+    Be precise and technical but accessible. Include code snippets or commands if helpful.
+
+  topics:
+    subscribe:
+      - ticket.technical
+    publish:
+      - ticket.response
+
+  mcp:
+    servers:
+      - name: docker-gateway
+        command: ["docker", "mcp", "gateway", "run"]

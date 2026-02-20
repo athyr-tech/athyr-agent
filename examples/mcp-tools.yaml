@@ -1,0 +1,61 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# MCP Tools Agent - Research assistant with academic database access
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Run:    make run-mcp-tui           (recommended)
+#         make run-mcp               (terminal mode)
+#
+# Test:   Messaging tab (press 3) → topic: research.query
+# Watch:  Dashboard (messages), Tools (MCP executions), Logs (debug)
+#
+# Example message:
+#   What are the latest papers on transformer architectures?
+#
+# Expected output:
+#   - List of relevant papers with titles and links
+#   - Brief synthesis of findings
+#   - Confidence rating (high/medium/low)
+#
+# Prerequisites:
+#   - Docker Desktop with MCP enabled (docker mcp gateway run)
+#   - A model that supports tool calling (e.g., google/gemini-2.5-flash-lite)
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: research-assistant
+  description: Research assistant with access to academic paper search tools
+
+  # Use a model that supports tool calling
+  # Free models typically don't support tools - use gemini-2.5-flash-lite, claude-3-haiku, etc.
+  model: google/gemini-2.5-flash-lite
+
+  instructions: |
+    You are a research assistant with access to academic paper search tools.
+
+    When answering questions:
+    1. Search relevant databases (arXiv, PubMed, Semantic Scholar, etc.)
+    2. Cite sources with titles and links
+    3. Synthesize findings into a clear answer
+    4. Rate confidence: high (multiple sources agree), medium (some evidence), low (limited data)
+
+    Available tools include:
+    - search_arxiv: Search arXiv for papers
+    - search_pubmed: Search PubMed for medical papers
+    - search_semantic: Search Semantic Scholar
+    - read_arxiv_paper: Get full details of an arXiv paper
+
+    Be thorough but concise. Prioritize recent, highly-cited papers.
+
+  topics:
+    subscribe:
+      - research.query
+    publish:
+      - research.results
+
+  # MCP server configuration
+  # The Docker MCP gateway provides access to all enabled MCP servers
+  mcp:
+    servers:
+      - name: docker-gateway
+        command: ["docker", "mcp", "gateway", "run"]

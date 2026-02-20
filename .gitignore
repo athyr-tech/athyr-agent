@@ -1,0 +1,52 @@
+# Binaries
+athyr-agent
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Go build cache
+*.o
+*.a
+
+# Coverage
+*.out
+coverage.html
+
+# Vendor (if not committing vendor/)
+# vendor/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.env
+
+# Debug
+debug
+__debug_bin*
+
+# Local config overrides
+*.local.yaml
+*.local.yml
+/.claude/
+CLAUDE.md
+AGENTS.md
+_local/
+/bin/
+docs/plans/

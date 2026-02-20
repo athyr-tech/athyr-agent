@@ -1,0 +1,32 @@
+server:
+  grpc_port: 9090
+  http_port: 8080
+
+storage:
+  data_dir: /app/data
+  max_memory: 1GB
+  max_storage: 10GB
+  retention:
+    sessions: 24h
+    agents: 168h
+    responses: 5m
+
+llm:
+  backends:
+    - name: openrouter
+      type: openrouter
+      url: https://openrouter.ai/api/v1
+      api_key: __OR_ONEUSD__
+
+  retry:
+    max_attempts: 3
+    backoff: exponential
+
+memory:
+  default_profile: rolling_window
+  max_tokens: 4096
+  summarization_threshold: 3000
+
+agents:
+  heartbeat_interval: 30s
+  disconnect_timeout: 60s

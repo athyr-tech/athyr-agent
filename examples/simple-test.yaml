@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Simple Test Agent - Basic connectivity and response testing
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Run:    make run-simple-tui        (recommended)
+#         make run-simple            (terminal mode)
+#
+# Test:   Messaging tab (press 3) → topic: test.input
+# Watch:  Dashboard (messages), Logs (debug)
+#
+# Example message:
+#   Hello, how are you?
+#
+# Expected output:
+#   A brief, friendly response acknowledging your message.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  name: simple-test
+  description: Simple test agent for connectivity testing
+
+  model: liquid/lfm-2.5-1.2b-instruct:free
+
+  instructions: |
+    You are a test agent. Respond briefly and clearly.
+    Always acknowledge the message and provide a helpful response.
+
+    Keep responses concise - this is for testing, not conversation.
+
+  topics:
+    subscribe:
+      - test.input
+    publish:
+      - test.output
