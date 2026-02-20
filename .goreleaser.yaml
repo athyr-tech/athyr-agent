@@ -1,0 +1,46 @@
+version: 2
+
+project_name: athyr-agent
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - main: ./cmd/athyr-agent
+    binary: athyr-agent
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/athyr-tech/athyr-agent/internal/cli.Version={{.Version}}
+      - -X github.com/athyr-tech/athyr-agent/internal/cli.GitCommit={{.ShortCommit}}
+      - -X github.com/athyr-tech/athyr-agent/internal/cli.BuildDate={{.Date}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+      - "^ci:"
+      - "^test:"
+
+release:
+  github:
+    owner: athyr-tech
+    name: athyr-agent
