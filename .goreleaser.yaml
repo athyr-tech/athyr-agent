@@ -40,6 +40,14 @@ changelog:
       - "^ci:"
       - "^test:"
 
+homebrew_casks:
+  - repository:
+      owner: athyr-tech
+      name: homebrew-tap
+    name: athyr-agent
+    homepage: https://athyr.tech
+    description: YAML-driven agent runner for Athyr
+
 release:
   github:
     owner: athyr-tech
