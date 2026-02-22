@@ -1,4 +1,4 @@
-.PHONY: build test clean install validate send send-session docker-up docker-down docker-logs help
+.PHONY: build build-pipe build-all test clean install install-pipe validate send send-session docker-up docker-down docker-logs help
 
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -8,9 +8,19 @@ LDFLAGS := -ldflags "-X github.com/athyr-tech/athyr-agent/internal/cli.Version=$
                      -X github.com/athyr-tech/athyr-agent/internal/cli.GitCommit=$(COMMIT) \
                      -X github.com/athyr-tech/athyr-agent/internal/cli.BuildDate=$(DATE)"
 
+LDFLAGS_PIPE := -ldflags "-X github.com/athyr-tech/athyr-agent/internal/pipe/cli.Version=$(VERSION) \
+                          -X github.com/athyr-tech/athyr-agent/internal/pipe/cli.GitCommit=$(COMMIT) \
+                          -X github.com/athyr-tech/athyr-agent/internal/pipe/cli.BuildDate=$(DATE)"
+
 build:
 	@mkdir -p bin
 	go build $(LDFLAGS) -o bin/athyr-agent ./cmd/athyr-agent
+
+build-pipe:
+	@mkdir -p bin
+	go build $(LDFLAGS_PIPE) -o bin/athyr-pipe ./cmd/athyr-pipe
+
+build-all: build build-pipe
 
 test:
 	go test -v ./...
@@ -21,6 +31,9 @@ clean:
 
 install:
 	go install $(LDFLAGS) ./cmd/athyr-agent
+
+install-pipe:
+	go install $(LDFLAGS_PIPE) ./cmd/athyr-pipe
 
 # Development helpers
 validate:

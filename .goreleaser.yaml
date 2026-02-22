@@ -8,7 +8,8 @@ before:
     - go test ./...
 
 builds:
-  - main: ./cmd/athyr-agent
+  - id: athyr-agent
+    main: ./cmd/athyr-agent
     binary: athyr-agent
     env:
       - CGO_ENABLED=0
@@ -17,6 +18,23 @@ builds:
       - -X github.com/athyr-tech/athyr-agent/internal/cli.Version={{.Version}}
       - -X github.com/athyr-tech/athyr-agent/internal/cli.GitCommit={{.ShortCommit}}
       - -X github.com/athyr-tech/athyr-agent/internal/cli.BuildDate={{.Date}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+  - id: athyr-pipe
+    main: ./cmd/athyr-pipe
+    binary: athyr-pipe
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/athyr-tech/athyr-agent/internal/pipe/cli.Version={{.Version}}
+      - -X github.com/athyr-tech/athyr-agent/internal/pipe/cli.GitCommit={{.ShortCommit}}
+      - -X github.com/athyr-tech/athyr-agent/internal/pipe/cli.BuildDate={{.Date}}
     goos:
       - linux
       - darwin
@@ -42,6 +60,8 @@ changelog:
 
 brews:
   - name: athyr-agent
+    ids:
+      - athyr-agent
     repository:
       owner: athyr-tech
       name: homebrew-tap
@@ -55,6 +75,24 @@ brews:
       bin.install "athyr-agent"
     test: |
       system bin/"athyr-agent", "version"
+
+  - name: athyr-pipe
+    ids:
+      - athyr-pipe
+    repository:
+      owner: athyr-tech
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: https://athyr.tech
+    description: Unix-native agent piping for Athyr
+    license: MIT
+    install: |
+      bin.install "athyr-pipe"
+      bin.install_symlink "athyr-pipe" => "ap"
+    test: |
+      system bin/"athyr-pipe", "version"
 
 release:
   github:
